@@ -1,26 +1,33 @@
-from flask import Flask, request, jsonify
-from textblob import TextBlob
+from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='templates')
 
+# Emotion analysis function (dummy example)
+def analyze_emotion(message):
+    # Replace with your actual emotion recognition logic
+    if "happy" in message:
+        return "Happy"
+    elif "sad" in message:
+        return "Sad"
+    else:
+        return "Neutral"
+
+# Route for rendering the main HTML page
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Route for emotion analysis
 @app.route('/analyze-emotion', methods=['POST'])
-def analyze_emotion():
+def get_emotion():
     data = request.get_json()
     message = data['message']
 
-    # Perform sentiment analysis using TextBlob
-    analysis = TextBlob(message)
-    sentiment_score = analysis.sentiment.polarity
+    # Perform emotion analysis
+    emotion = analyze_emotion(message)
 
-    # Determine emotion based on sentiment score
-    if sentiment_score > 0.5:
-        emotion = 'Happy'
-    elif sentiment_score < -0.5:
-        emotion = 'Sad'
-    else:
-        emotion = 'Neutral'
-
-    return jsonify({'message': message, 'emotion': emotion})
+    # Return JSON response
+    return jsonify({'emotion': emotion})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080)
